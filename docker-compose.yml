@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  postgresResource_reservation:
+    image: postgres:14.1-alpine
+    expose:
+      - "5436"
+    container_name: postgresResource_reservation
+    ports:
+      - "5436:5436"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: resource_reservation 
+    volumes:
+      - db:/var/lib/postgresql/data
+    command: -p 5436
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4700:4700"
+    restart: always
+    depends_on:
+      - postgresResource_reservation
+    environment:
+      - DB_NAME = resource_reservation
+      - DB_PORT = 5436
+      - DB_PASSWORD = postgres
+      - DB_HOST = localhost
+      - DB_USER = postgres
+      - DATABASE_URL = process.env.DB_URL
+    volumes:
+      - ./:/src
+      - /node_modules
+volumes:
+  db:
+    driver: local
